@@ -34,3 +34,4 @@ seleniumbase
 selenium
 langchain
 faiss-cpu
+openpyxl
