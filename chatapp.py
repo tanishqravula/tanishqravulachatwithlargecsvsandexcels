@@ -76,7 +76,7 @@ def get_conversational_chain():
 
 def clear_chat_history():
     st.session_state.messages = [
-        {"role": "assistant", "content": ""Ask Questions from the CSV and Excel Files uploaded .. ✍️📝"}]
+        {"role": "assistant", "content": "Ask Questions from the CSV and Excel Files uploaded .. ✍️📝"}]
 
 
 def user_input(user_question):
