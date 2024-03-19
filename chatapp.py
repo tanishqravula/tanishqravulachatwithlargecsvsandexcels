@@ -76,7 +76,7 @@ def get_conversational_chain():
 
 def clear_chat_history():
     st.session_state.messages = [
-        {"role": "assistant", "content": "Ask Questions from the PDF Files uploaded .. ✍️📝"}]
+        {"role": "assistant", "content": ""Ask Questions from the CSV and Excel Files uploaded .. ✍️📝"}]
 
 
 def user_input(user_question):
@@ -100,14 +100,14 @@ def user_input(user_question):
 
 
 def main():
-    st.set_page_config("Tanishq Ravula PDF Chatbot", page_icon=":scroll:")
-    st.header("Multi-PDF's 📚 - Chat Agent 🤖 ")
+    st.set_page_config("Tanishq Ravula Large Csv and Excle Chatbot", page_icon=":scroll:")
+    st.header("CSV and EXCEL 📚 - Chat Agent 🤖 ")
 
     with st.sidebar:
         st.image("Robot.png")
         st.write("---")
-        st.title("📁 PDF File's Section")
-        pdf_docs = st.file_uploader("Upload your PDF Files & \n Click on the Submit & Process Button ")
+        st.title("📁 CSV and Excel File's Section")
+        pdf_docs = st.file_uploader("Upload your CSV or Excel Files & \n Click on the Submit & Process Button ")
 
         if st.button("Submit & Process"):
             with st.spinner("Processing..."):  # user friendly message.
@@ -117,7 +117,7 @@ def main():
                 st.success("Done")
 
         st.write("---")
-        st.write("Tanishq Ravulas AI PDF Chatbot")  # add this line to display the image
+        st.write("Tanishq Ravulas AI CSV and EXCEL Chatbot")  # add this line to display the image
     st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
 
     # Chat input
@@ -125,7 +125,7 @@ def main():
 
     if "messages" not in st.session_state.keys():
         st.session_state.messages = [
-            {"role": "assistant", "content": "Ask Questions from the PDF Files uploaded .. ✍️📝"}]
+            {"role": "assistant", "content": "Ask Questions from the CSV and Excel Files uploaded .. ✍️📝"}]
 
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
