@@ -13,7 +13,7 @@ import fitz  # PyMuPDF
 import pdf2image
 from pdf2image.exceptions import PDFPageCountError
 import google.generativeai as genai
-
+import asyncio
 load_dotenv()
 
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
@@ -79,12 +79,15 @@ def clear_chat_history():
         {"role": "assistant", "content": "Ask Questions from the CSV and Excel Files uploaded .. ✍️📝"}]
 
 
-def user_input(user_question):
+async def user_input(user_question):
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-
+    
     try:
-        new_db = FAISS.load_local("faiss_index", embeddings,allow_dangerous_deserialization=True)  # Set allow_dangerous_deserialization=True
+        new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
         docs = new_db.similarity_search(user_question)
+
+        if not docs:
+            return "No relevant documents found."
 
         chain = get_conversational_chain()
 
@@ -93,10 +96,16 @@ def user_input(user_question):
             return_only_outputs=True
         )
 
-        return response
+        if not response or 'output_text' not in response:
+            return "No valid response generated."
+
+        return response['output_text']
 
     except Exception as e:
         st.error(f"Error occurred: {e}")
+        return None
+
+
 
 
 def main():
@@ -140,16 +149,15 @@ def main():
     if st.session_state.messages[-1]["role"] != "assistant":
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
-                response = user_input(prompt)
-                if response is not None:  # Check if response is not None
-                    full_response = ''
-                    for item in response['output_text']:
-                        full_response += item
-                    st.markdown(full_response)  # Display full response
-                    message = {"role": "assistant", "content": full_response}
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                response = loop.run_until_complete(user_input(prompt))
+                if response:
+                    st.write(response)
+                    message = {"role": "assistant", "content": response}
                     st.session_state.messages.append(message)
                 else:
-                    st.error("Failed to get a response. Please try again.")
+                    st.write("No valid response generated.")
 
 
 if __name__ == "__main__":
