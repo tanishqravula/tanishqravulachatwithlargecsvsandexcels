@@ -35,3 +35,4 @@ selenium
 langchain
 faiss-cpu
 openpyxl
+langchain-community
