@@ -31,15 +31,8 @@ def get_pdf_text(csvexcelattachment):
         wb = openpyxl.load_workbook(csvexcelattachment)
         sheet = wb.active
         for row in sheet.iter_rows():
-            # extract each cell value
             for cell in row:
                 txt += str(cell.value)
-        # try:
-        # texts, nbPages = images_to_txt(pdf.read(), 'eng')
-        # text_data_f = "\n\n".join(texts)
-        # text+=text_data_f
-        # except PDFPageCountError as e:
-        # st.write(f".")
     return txt
 
 
@@ -58,17 +51,18 @@ def get_vector_store(text_chunks):
 
 def get_conversational_chain():
     prompt_template = """
-    Answer the question as detailed as possible from the provided context, make sure to provide all the details, if the answer is not in
-    provided context just say, "answer is not available in the context", don't provide the wrong answer\n\n
+    Answer the question as detailed as possible from the provided context, make sure to provide all the details, and elaborate on every point.
+    Provide examples, explanations, and any relevant information. If the answer is not in the provided context, just say, "answer is not available in the context".
+    Do not provide incorrect information.\n\n
     Context:\n {context}?\n
     Question: \n{question}\n
 
     Answer:
     """
 
-    model = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.7)
+    model = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.9)
 
-    prompt = PromptTemplate(template=prompt_template, input_variables=["context", "question","explain","describe","exactly","this","list","mention","write","answer","what","why","how","where"])
+    prompt = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
     chain = load_qa_chain(model, chain_type="stuff", prompt=prompt)
 
     return chain
@@ -106,8 +100,6 @@ async def user_input(user_question):
         return None
 
 
-
-
 def main():
     st.set_page_config("Tanishq Ravula Large Csv and Excle Chatbot", page_icon=":scroll:")
     st.header("CSV and EXCEL 📚 - Chat Agent 🤖 ")
@@ -119,18 +111,15 @@ def main():
         pdf_docs = st.file_uploader("Upload your CSV or Excel Files & \n Click on the Submit & Process Button ")
 
         if st.button("Submit & Process"):
-            with st.spinner("Processing..."):  # user friendly message.
-                raw_text = get_pdf_text(pdf_docs)  # get the pdf text
-                text_chunks = get_text_chunks(raw_text)  # get the text chunks
-                get_vector_store(text_chunks)  # create vector store
+            with st.spinner("Processing..."): 
+                raw_text = get_pdf_text(pdf_docs)  
+                text_chunks = get_text_chunks(raw_text)  
+                get_vector_store(text_chunks)  
                 st.success("Done")
 
         st.write("---")
-        st.write("Tanishq Ravulas AI CSV and EXCEL Chatbot")  # add this line to display the image
+        st.write("Tanishq Ravulas AI CSV and EXCEL Chatbot")  
     st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
-
-    # Chat input
-    # Placeholder for chat messages
 
     if "messages" not in st.session_state.keys():
         st.session_state.messages = [
@@ -145,7 +134,6 @@ def main():
         with st.chat_message("user"):
             st.write(prompt)
 
-    # Display chat messages and bot response
     if st.session_state.messages[-1]["role"] != "assistant":
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
