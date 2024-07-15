@@ -74,7 +74,7 @@ def clear_chat_history():
 
 
 async def user_input(user_question):
-    embeddings = GoogleGenerativeAIEmbeddings(model="	models/gemini-1.5-pro")
+    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
     
     try:
         new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
