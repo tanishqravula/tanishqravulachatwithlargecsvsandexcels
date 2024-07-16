@@ -89,10 +89,11 @@ async def user_input(user_question, placeholder):
 
         response_text = response['output_text']
         current_text = ""
-        for char in response_text:
-            current_text += char
+        chunk_size = 50  # Adjust the chunk size for faster display
+        for i in range(0, len(response_text), chunk_size):
+            current_text += response_text[i:i+chunk_size]
             placeholder.markdown(current_text)
-            await asyncio.sleep(0.01)  # Adjust the sleep time to control the speed of text display
+            await asyncio.sleep(0.01)  # Small delay for fast incremental display
 
     except Exception as e:
         st.error(f"Error occurred: {e}")
