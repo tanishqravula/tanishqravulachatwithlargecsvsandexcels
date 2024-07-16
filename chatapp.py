@@ -18,6 +18,7 @@ load_dotenv()
 
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
+
 def get_pdf_text(csvexcelattachment):
     txt = ""
     file_name = csvexcelattachment.name
@@ -34,16 +35,19 @@ def get_pdf_text(csvexcelattachment):
                 txt += str(cell.value)
     return txt
 
+
 def get_text_chunks(text):
     from langchain.text_splitter import RecursiveCharacterTextSplitter
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=10000, chunk_overlap=1000)
     chunks = text_splitter.split_text(text)
     return chunks
 
+
 def get_vector_store(text_chunks):
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
     vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
     vector_store.save_local("faiss_index")
+
 
 def get_conversational_chain():
     prompt_template = """
@@ -63,11 +67,13 @@ def get_conversational_chain():
 
     return chain
 
+
 def clear_chat_history():
     st.session_state.messages = [
         {"role": "assistant", "content": "Ask Questions from the CSV and Excel Files uploaded .. ✍️📝"}]
 
-async def user_input(user_question, placeholder):
+
+async def user_input(user_question):
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
     
     try:
@@ -87,17 +93,12 @@ async def user_input(user_question, placeholder):
         if not response or 'output_text' not in response:
             return "No valid response generated."
 
-        response_text = response['output_text']
-        current_text = ""
-        chunk_size = 50  # Adjust the chunk size for faster display
-        for i in range(0, len(response_text), chunk_size):
-            current_text += response_text[i:i+chunk_size]
-            placeholder.markdown(current_text)
-            await asyncio.sleep(0.01)  # Small delay for fast incremental display
+        return response['output_text']
 
     except Exception as e:
         st.error(f"Error occurred: {e}")
         return None
+
 
 def main():
     st.set_page_config("Tanishq Ravula Large Csv and Excle Chatbot", page_icon=":scroll:")
@@ -134,13 +135,18 @@ def main():
             st.write(prompt)
 
     if st.session_state.messages[-1]["role"] != "assistant":
-        response_placeholder = st.chat_message("assistant").empty()
-        with response_placeholder.container():
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            loop.run_until_complete(user_input(prompt, response_placeholder))
-            loop.close()
-            st.session_state.messages.append({"role": "assistant", "content": "Response displayed incrementally."})
+        with st.chat_message("assistant"):
+            with st.spinner("Thinking..."):
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                response = loop.run_until_complete(user_input(prompt))
+                if response:
+                    st.write(response)
+                    message = {"role": "assistant", "content": response}
+                    st.session_state.messages.append(message)
+                else:
+                    st.write("No valid response generated.")
+
 
 if __name__ == "__main__":
     main()
