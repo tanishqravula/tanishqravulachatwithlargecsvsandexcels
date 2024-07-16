@@ -88,17 +88,15 @@ async def user_input(user_question, placeholder):
             return "No valid response generated."
 
         response_text = response['output_text']
-        for chunk in generate_response_step_by_step(response_text):
-            placeholder.markdown(chunk)
-            await asyncio.sleep(0.05)  # Adjust the sleep time to control the speed of text display
+        current_text = ""
+        for char in response_text:
+            current_text += char
+            placeholder.markdown(current_text)
+            await asyncio.sleep(0.01)  # Adjust the sleep time to control the speed of text display
 
     except Exception as e:
         st.error(f"Error occurred: {e}")
         return None
-
-def generate_response_step_by_step(response_text, chunk_size=10):
-    for i in range(0, len(response_text), chunk_size):
-        yield response_text[:i+chunk_size]
 
 def main():
     st.set_page_config("Tanishq Ravula Large Csv and Excle Chatbot", page_icon=":scroll:")
