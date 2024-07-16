@@ -132,14 +132,18 @@ def main():
             st.write(prompt)
 
     if st.session_state.messages[-1]["role"] != "assistant":
-        with st.chat_message("assistant"):
+        response_placeholder = st.chat_message("assistant").empty()
+        with response_placeholder:
             with st.spinner("Thinking..."):
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
                 response = loop.run_until_complete(user_input(prompt))
                 if response:
-                    st.write(" ".join([chunk for chunk in generate_response_step_by_step(response)]))
-                    message = {"role": "assistant", "content": response}
+                    response_text = ""
+                    for chunk in generate_response_step_by_step(response):
+                        response_text += chunk
+                        response_placeholder.write(response_text)
+                    message = {"role": "assistant", "content": response_text}
                     st.session_state.messages.append(message)
                 else:
                     st.write("No valid response generated.")
