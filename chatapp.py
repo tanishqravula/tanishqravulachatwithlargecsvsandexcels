@@ -11,7 +11,7 @@ from pytesseract import Output, TesseractError
 from functions import convert_pdf_to_txt_pages, convert_pdf_to_txt_file, save_pages, displayPDF, images_to_txt
 import fitz  # PyMuPDF
 import pdf2image
-from pdf2image.exceptions.PDFPageCountError
+from pdf2image.exceptions import PDFPageCountError
 import google.generativeai as genai
 import asyncio
 load_dotenv()
