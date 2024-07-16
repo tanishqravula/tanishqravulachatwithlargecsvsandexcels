@@ -67,7 +67,7 @@ def clear_chat_history():
     st.session_state.messages = [
         {"role": "assistant", "content": "Ask Questions from the CSV and Excel Files uploaded .. ✍️📝"}]
 
-async def user_input(user_question):
+async def user_input(user_question, placeholder):
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
     
     try:
@@ -87,15 +87,18 @@ async def user_input(user_question):
         if not response or 'output_text' not in response:
             return "No valid response generated."
 
-        return response['output_text']
+        response_text = response['output_text']
+        for chunk in generate_response_step_by_step(response_text):
+            placeholder.markdown(chunk)
+            await asyncio.sleep(0.05)  # Adjust the sleep time to control the speed of text display
 
     except Exception as e:
         st.error(f"Error occurred: {e}")
         return None
 
-def generate_response_step_by_step(response_text, chunk_size=50):
+def generate_response_step_by_step(response_text, chunk_size=10):
     for i in range(0, len(response_text), chunk_size):
-        yield response_text[i:i + chunk_size]
+        yield response_text[:i+chunk_size]
 
 def main():
     st.set_page_config("Tanishq Ravula Large Csv and Excle Chatbot", page_icon=":scroll:")
@@ -133,20 +136,12 @@ def main():
 
     if st.session_state.messages[-1]["role"] != "assistant":
         response_placeholder = st.chat_message("assistant").empty()
-        with response_placeholder:
-            with st.spinner("Thinking..."):
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                response = loop.run_until_complete(user_input(prompt))
-                if response:
-                    response_text = ""
-                    for chunk in generate_response_step_by_step(response):
-                        response_text += chunk
-                        response_placeholder.write(response_text)
-                    message = {"role": "assistant", "content": response_text}
-                    st.session_state.messages.append(message)
-                else:
-                    st.write("No valid response generated.")
+        with response_placeholder.container():
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(user_input(prompt, response_placeholder))
+            loop.close()
+            st.session_state.messages.append({"role": "assistant", "content": "Response displayed incrementally."})
 
 if __name__ == "__main__":
     main()
