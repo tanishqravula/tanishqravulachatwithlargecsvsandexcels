@@ -108,7 +108,7 @@ def main():
         st.image("Robot.png")
         st.write("---")
         st.title("📁 CSV and Excel File's Section")
-        pdf_docs = st.file_uploader("Upload your CSV or Excel Files & \n Click on the Submit & Process Button ")
+        pdf_docs = st.file_uploader("Upload your CSV or Excel Files & \n Click on the Submit & Process Button ",type=["csv","xlsx","xls"])
 
         if st.button("Submit & Process"):
             with st.spinner("Processing..."): 
