@@ -38,7 +38,7 @@ def get_pdf_text(csvexcelattachment):
 
 def get_text_chunks(text):
     from langchain.text_splitter import RecursiveCharacterTextSplitter
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=50000, chunk_overlap=5000)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=10000, chunk_overlap=1000)
     chunks = text_splitter.split_text(text)
     return chunks
 
