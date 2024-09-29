@@ -44,7 +44,7 @@ def get_text_chunks(text):
 
 
 def get_vector_store(text_chunks):
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
+    embeddings = genai.embed_content(model="models/text-embedding-004", task_type="retrieval_document")
     vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
     vector_store.save_local("faiss_index")
 
@@ -74,7 +74,7 @@ def clear_chat_history():
 
 
 async def user_input(user_question):
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
+    embeddings = genai.embed_content(model="models/text-embedding-004", task_type="retrieval_document")
     
     try:
         new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
